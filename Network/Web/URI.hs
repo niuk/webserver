@@ -4,8 +4,8 @@
   Parser for URI
 -}
 
-module Network.Web.URI (
-    URI, uriScheme, uriAuthority, uriPath, uriQuery, uriFragment
+module Network.Web.URI
+  ( URI, uriScheme, uriAuthority, uriPath, uriQuery, uriFragment
   , URIAuth, uriUserInfo, uriRegName, uriPort
   , parseURI
   , uriHostName, uriPortNumber, toURL, toURLwoPort
@@ -18,22 +18,46 @@ import Data.Char
 {-|
   Abstract data type for URI
 -}
-data URI = URI {
-    uriScheme    :: S.ByteString
+data URI = URI
+  { uriScheme    :: S.ByteString
   , uriAuthority :: Maybe URIAuth
   , uriPath      :: S.ByteString
   , uriQuery     :: S.ByteString
   , uriFragment  :: S.ByteString
-} deriving Show
+  }
 
 {-|
   Abstract data type for URI Authority
 -}
-data URIAuth = URIAuth {
-    uriUserInfo :: S.ByteString
+data URIAuth = URIAuth
+  { uriUserInfo :: S.ByteString
   , uriRegName  :: S.ByteString
   , uriPort     :: S.ByteString
-} deriving Show
+  }
+
+instance Show URI where
+  show uri = 
+    (S.unpack (uriScheme uri) ?++ "//")
+    ++ (case uriAuthority uri of
+          Nothing -> ""
+          Just uriAuth -> show uriAuth)
+    ++ S.unpack (uriPath uri)
+    ++ ("?" ++? S.unpack (uriQuery uri))
+    ++ ("#" ++? S.unpack (uriFragment uri))
+
+instance Show URIAuth where
+  show uriAuth =
+    (S.unpack (uriUserInfo uriAuth) ?++ "@")
+    ++ S.unpack (uriRegName uriAuth)
+    ++ (":" ++? S.unpack (uriPort uriAuth))
+
+a ?++ b
+  | a == "" = ""
+  | True = a ++ b
+
+a ++? b
+  | b == "" = ""
+  | True = a ++ b
 
 ----------------------------------------------------------------
 
